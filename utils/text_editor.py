@@ -19,6 +19,7 @@ class Editor:
         params = self.load_yml(config_dict["llm_config"])
         if params is None or len(params) == 0:
             self._params = {
+                "model": "ChatGPT",
                 "engine": "generation-davinci-003",
                 "temperature": 0.,
                 "max_tokens": 100,
@@ -122,7 +123,12 @@ class Editor:
 
         return list(response_dict.keys())[0], list(response_dict.values())[0]
 
-    def save_history(self, file_name):
+    def save_history(self, file_name: str):
+        """
+        Saves the history dictionary that contains all edits to the input text.
+        :param file_name: Name of file where to save history
+        :return:
+        """
         with open(file_name, "w", encoding="utf8") as f:
             f.write(json.dumps(self._history_dict, indent=1, ensure_ascii=False))
 
