@@ -1,0 +1,16 @@
+certifi==2023.7.22
+charset-normalizer==3.3.1
+diskcache==5.6.3
+filelock==3.12.4
+fsspec==2023.10.0
+huggingface-hub==0.18.0
+idna==3.4
+llama_cpp_python==0.2.11
+multipledispatch==1.0.0
+numpy==1.26.1
+packaging==23.2
+PyYAML==6.0.1
+requests==2.31.0
+tqdm==4.66.1
+typing_extensions==4.8.0
+urllib3==2.0.7
