@@ -1,0 +1,6 @@
+AnonymizeAuthor:
+  Context: >
+    Find and replace the author name at every instance in the email below and replace it by Max Mustermann.
+AnonymizeRecipent:
+  Context: >
+    Find and replace the recipient at every instance in the email below and replace it by John Doe.

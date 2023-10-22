@@ -1,0 +1,2 @@
+llm_config: "llm_configs/mistral-7b.yaml"
+prompt_config: "prompt_configs/anonymize_emails.yaml"
