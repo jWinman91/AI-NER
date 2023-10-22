@@ -62,7 +62,6 @@ class Editor:
         :return: string of static context
         """
         return f"""
-          Keep changes of the text to a minimum.
           Return the output in json format: {{"{key}": "output"}}.
           Delete all blackslashes in the output.
         """
@@ -116,10 +115,10 @@ class Editor:
             response = self._model(**self._params)
 
         try:
+            print("Output: ", response["choices"][0]["text"].split("\n")[-1])
             response_dict = json.loads(response["choices"][0]["text"].split("\n")[-1].encode("utf-8").decode())
         except:
             response_dict = {prompt_name: "FAILED"}
-            print("Output: ", response["choices"][0]["text"].split("\n")[-1])
 
         return list(response_dict.keys())[0], list(response_dict.values())[0]
 

@@ -1,6 +1,8 @@
 AnonymizeAuthor:
   Context: >
-    Find and replace the author name at every instance in the email below and replace it by Max Mustermann.
+    Replace the author name at every instance in the email below by Max Mustermann.
+    Output the entire email with the replaced name.
 AnonymizeRecipent:
   Context: >
-    Find and replace the recipient at every instance in the email below and replace it by John Doe.
+    Replace the recipient at every instance in the email below by John Doe.
+    Output the entire email with the replaced name.
