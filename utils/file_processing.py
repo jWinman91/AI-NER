@@ -1,6 +1,6 @@
 def read_file(file_path: str) -> str:
     with open(file_path, "r", encoding="utf8") as f:
-        input_text = file_path.read()
+        input_text = f.read()
     return input_text
 
 
