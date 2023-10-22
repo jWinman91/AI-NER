@@ -4,23 +4,23 @@ import subprocess
 
 import utils.file_processing as process
 from utils.text_editor import Editor
+from typing import List
 
 
-def main(input_files: List[str], output_dir: str,
-         configfile: str = "config_anonymize_email.yaml", modelfile: str = "model/mistral-7b-v0.1.Q4_K_M.gguf"):
+def main(input_files: List[str], output_dir: str, configfile: str = "config.yaml"):
     """
     Runs the email editor from the config file.
     :param input_files: List of files of emails
     :param output_dir: Directory where to store edited emails
     :param configfile: config file with prompt instructions
-    :param modelfile: path to model to use
     :return:
     """
     for input_file in input_files:
         input_text = process.read_file(input_file)
 
-        text_editor = Editor(configfile, modelfile)
+        text_editor = Editor(configfile)
         output_text = text_editor.edit_text(input_text)
+        text_editor.save_history("history.json")
 
         subprocess.call(f"mkdir -p {output_dir}", shell=True)
         file_name = input_file.split("/")[-1]

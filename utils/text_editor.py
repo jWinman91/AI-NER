@@ -1,22 +1,23 @@
-from llama_cpp import Llama
+import json
 import yaml
 
 from collections import OrderedDict
+from llama_cpp import Llama
 from multipledispatch import dispatch
 from typing import List, Optional, Tuple, Dict
 
 
 class Editor:
-    def __init__(self, configfile: str, modelfile: str):
+    def __init__(self, configfile: str):
         """
-        Class to anonymize input text by using an LLM.
-        :param params: dictionary of parameters to pass to the OpenAI-API
-        :param conn_id: db to log data
+        Class to edit input text by using an LLM.
+        :param configfile: path to config file that defines location of config files
         """
-        self.__config_dict = self.load_yml(configfile)
+        config_dict = self.load_yml(configfile)
 
-        params = self.__config_dict["LLM"]
-        if len(params) == 0:
+        self._prompts = self.load_yml(config_dict["prompt_config"])
+        params = self.load_yml(config_dict["llm_config"])
+        if params is None or len(params) == 0:
             self._params = {
                 "engine": "generation-davinci-003",
                 "temperature": 0.,
@@ -30,15 +31,14 @@ class Editor:
         else:
             self._params = params
 
-        self._prompts = self.__config_dict["Prompt"]
-
         self._history_dict = OrderedDict()
 
-        if "OpenAI" in modelfile:
+        if "ChatGPT" in self._params["model"]:
             import openai
+            self._params["engine"] = self._params["model"]["engine"]
         else:
-            del self._params["engine"]
-            self._model = Llama(model_path=modelfile)
+            self._model = Llama(model_path=self._params["model"])
+        del self._params["model"]
 
     @staticmethod
     def load_yml(configfile: str) -> Dict:
@@ -63,7 +63,7 @@ class Editor:
         """
         return f"""
           Keep changes of the text to a minimum.
-          Return the output in json format: {{"{key}": "{key}"}}.
+          Return the output in json format: {{"{key}": "output"}}.
           Delete all blackslashes in the output.
         """
 
@@ -75,7 +75,7 @@ class Editor:
         :param prompt_instruction: instruction of the prompt
         :return: prompt statement including input text
         """
-        context = value["Context"] + self.static_context(prompt_name)
+        context = prompt_instruction["Context"] + self.static_context(prompt_name)
 
         if "Examples" in prompt_instruction.keys():
             examples_str = ""
@@ -119,8 +119,13 @@ class Editor:
             response_dict = json.loads(response["choices"][0]["text"].split("\n")[-1].encode("utf-8").decode())
         except:
             response_dict = {prompt_name: "FAILED"}
+            print("Output: ", response["choices"][0]["text"].split("\n")[-1])
 
         return list(response_dict.keys())[0], list(response_dict.values())[0]
+
+    def save_history(self, file_name):
+        with open(file_name, "w", encoding="utf8") as f:
+            f.write(json.dumps(self._history_dict, indent=1, ensure_ascii=False))
 
     @dispatch(str)
     def edit_text(self, input_text: str) -> str:
@@ -130,13 +135,12 @@ class Editor:
         :return: edited input text
         """
         self._history_dict["input_text"] = input_text
-        for prompt_name, prompt_instruction in self._prompts.items():
-            prompt = self.build_prompt(self._history_dict[-1], prompt_name, prompt_instruction)
-            print(prompt)
+        for i, (prompt_name, prompt_instruction) in enumerate(self._prompts.items()):
+            prompt = self.build_prompt(list(self._history_dict.values())[-1], prompt_name, prompt_instruction)
             prompt_name, response = self.get_response(prompt_name, prompt)
-            self._history_dict[prompt_name] = response
+            self._history_dict[f"{prompt_name}_{i}"] = response
 
-        return self._history_dict[-1]
+        return list(self._history_dict.values())[-1]
 
     @dispatch(list)
     def edit_text(self, input_texts: List[str]) -> List[str]:
