@@ -1,10 +1,7 @@
 Anonymisierung:
-  Restrictor:
-    "Name": "TextEqual.TextEqual"
-    Params:
-      alter_tokens: [">NAME<"]
+  replace_token: ">NAME<"
   Context: >
-        Ersetze alle Namen aus dem folgenden Text durch den Platzhalter >NAME<:
+        Gib alle Vorkommnisse von Namen aus dem folgenden Text in einer Liste wieder:
   Examples:
     Example_1:
       Input: >
@@ -13,29 +10,16 @@ Anonymisierung:
         
         mit freundlichen Grüßen,
         Oli Sharif
-      Output: >
-        Lieber >NAME<,
-        Mein Name ist >NAME<. Können Sie mir ein Exemplar Ihres Buches zukommen lassen?
-        
-        mit freundlichen Grüßen,
-        >NAME<
+      Output: ["Dr Winkelmann", "Oli Sharif"]
     Example_2:
       Input: >
         Sehr geehrte Damen und Herren,
-        mein Name ist Jens Winkelmann. Hier in Wanne-Eickel läuft mal wieder gar nix.
-        
-        Was ist da wieder los bei Vodafone?
-        
-        mit enttäuschenden Grüßen,
+        ich hatte am Telefon bereits mit Herrn Stroganov gesprochen.
+        Schicken Sie mir bitte meinen neuen Vertrag zu!
+
+        Viele Grüßen,
         Jens Winkelmann
-      Output: >
-        Sehr geehrte Damen und Herren,
-        mein Name ist >NAME<. Hier in Wanne-Eickel läuft mal wieder gar nix.
-        
-        Was ist da wieder los bei Vodafone?
-        
-        mit enttäuschenden Grüßen,
-        >NAME<
+      Output: ["Herrn Stroganov", "Jens Winkelmann"]
     Example_3:
       Input: >
         Hallo,
@@ -44,35 +28,20 @@ Anonymisierung:
         
         Mfg
         Hainer Müller
-      Output: >
-        Hallo,
-        mein Name ist >NAME<. Ich habe eine Frage zu meinem DSL-Vertrag.
-        Bitte rufen Sie mich unter folgender Nummer zurück: 01739484727405.
-        
-        Mfg
-        >NAME<
+      Output: ["Hainer", "Hainer Müller"]
     Example_4:
       Input: >
         Name: Jessica Mustermann
         Kundennummer: 1234043
         
-        Guten Tag,
+        Guten Tag Herr Ulyanov,
         ich möchte mich über den schlechten Service ihrer Firma beschweren.
         Seit Tagen habe ich kein Internet. Bitte klären Sie das.
         
         Viele Grüße,
         Jessica Mustermann
-      Output: >
-        Name: >NAME<
-        Kundennummer: 1234043
-        
-        Guten Tag,
-        ich möchte mich über den schlechten Service ihrer Firma beschweren.
-        Seit Tagen habe ich kein Internet. Bitte klären Sie das.
-        
-        Viele Grüße,
-        >NAME<
-      
+      Output: ["Herr Ulyanov", "Jessica Mustermann"]
+
         
 #Kundennummern:
 #  Context: >
