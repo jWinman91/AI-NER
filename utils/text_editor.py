@@ -8,11 +8,6 @@ from multipledispatch import dispatch
 from typing import List, Optional, Tuple, Dict
 
 
-class EmptyRestrictor:
-    def run(text: str) -> bool:
-        return True
-
-
 class Editor:
     OUTPUT = "Antwort:"
     
@@ -24,8 +19,7 @@ class Editor:
         config_dict = self.load_yml(configfile)
 
         self._prompts = self.load_yml(config_dict["prompt_config"])
-        self._restrictor = EmptyRestrictor()
-        
+
         params = self.load_yml(config_dict["llm_config"])
         if params is None or len(params) == 0:
             self._params = {
@@ -48,7 +42,7 @@ class Editor:
             import openai
             self._params["engine"] = self._params["model"]["engine"]
         else:
-            self._model = Llama(model_path=self._params["model"], verbose=True, n_ctx=4096)
+            self._model = Llama(model_path=self._params["model"], verbose=True, n_ctx=2048)
         del self._params["model"]
 
     @staticmethod
@@ -65,11 +59,17 @@ class Editor:
                 print(err)
         return data
 
-    def build_prompt(self, input_text: str, prompt_name: str, prompt_instruction: str) -> str:
+    def static_prompt(self) -> str:
+        """
+        Adds a static statement to the prompt.
+        :return:
+        """
+        return f"""Gib die Antwort im validen json-Format {{"{self.OUTPUT[:-1]}": [{self.OUTPUT[:-1]}]}} aus:"""
+
+    def build_prompt(self, input_text: str, prompt_instruction: dict) -> str:
         """
         Defines prompt statement based on prompts defined in the config file.
         :param input_text: input text
-        :param prompt_name: name of prompt instruction
         :param prompt_instruction: instruction of the prompt
         :return: prompt statement including input text
         """
@@ -78,9 +78,10 @@ class Editor:
         if "Examples" in prompt_instruction.keys():
             prompt_str = ""
             for example in prompt_instruction["Examples"].values():
+                output = f"{example['Output']}".replace("'", "\"")
                 prompt_str += f"""
                 {context} {example["Input"]}
-                {self.OUTPUT} {example["Output"]}
+                {self.OUTPUT} {{"{self.OUTPUT[:-1]}": {output}}}
                 """
         else:
             prompt_str = ""
@@ -115,9 +116,13 @@ class Editor:
         
         response_text = response["choices"][0]["text"].split(self.OUTPUT)[-1].encode("utf-8").decode()
         self._history_dict[prompt_name] = response_text
-        restricted_response = self._restrictor.run(response_text)
-        self._history_dict[f"{prompt_name}_restr"] = str(restricted_response[0])
-        return restricted_response[1] if restricted_response[0] else "FAILED"
+        try:
+            found_values = json.loads(response_text, strict=False)
+        except Exception as e:
+            print(f"FAILED because of {e}")
+            found_values = {self.OUTPUT[:-1]: "FAILED"}
+
+        return found_values[self.OUTPUT[:-1]]
 
     def save_history(self, file_name: str):
         """
@@ -130,6 +135,10 @@ class Editor:
         
         self._history_dict = OrderedDict()
 
+    @staticmethod
+    def find_and_replace(self, input_text: str, chars: str):
+        return input_text.replace(chars)
+
     def edit_text(self, input_text: str) -> str:
         """
         Edits input text based on prompt instruction given in config file.
@@ -138,23 +147,20 @@ class Editor:
         """
         self._history_dict[f"input_text"] = input_text
         for prompt_name, prompt_instruction in self._prompts.items():
-            prompt = self.build_prompt(list(self._history_dict.values())[-1], prompt_name, prompt_instruction)
+            prompt = self.build_prompt(list(self._history_dict.values())[-1], prompt_instruction)
             
             print("############################ PROMPT ##############################")
             print(prompt)
             print("##################################################################")
             
-            self.build_restrictor(prompt_instruction, input_text)
-            response = self.get_response(f"{prompt_name}", prompt)
+            found_values = self.get_response(f"{prompt_name}", prompt)
+
+            self._history_dict[f"{prompt_name}_found_values"] = found_values
+
+            output_text = input_text
+            for found_value in found_values:
+                output_text = output_text.replace(found_value, prompt_instruction["replace_token"])
+
+            self._history_dict[f"{prompt_name}_output_text"] = output_text
 
         return list(self._history_dict.values())[-1]
-        
-    def build_restrictor(self, prompt_instruction: dict, input_text: str):
-        if "Restrictor" in prompt_instruction.keys():
-            module_name = prompt_instruction['Restrictor']["Name"].split('.')[0]
-            restrictor_class = prompt_instruction["Restrictor"]["Name"].split(".")[1]
-            params = prompt_instruction["Restrictor"]["Params"]
-            
-            module = importlib.import_module(f"restrictors.{module_name}")
-            
-            self._restrictor = getattr(module, restrictor_class)(input_text, **params)
