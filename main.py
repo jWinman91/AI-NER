@@ -15,15 +15,18 @@ def main(input_files: List[str], output_dir: str, configfile: str = "config.yaml
     :param configfile: config file with prompt instructions
     :return:
     """
-    for input_file in input_files:
+    subprocess.call(f"mkdir -p {output_dir}", shell=True)
+    subprocess.call(f"mkdir -p data/history", shell=True)
+    
+    text_editor = Editor(configfile)
+    
+    for i, input_file in enumerate(input_files):
         input_text = process.read_file(input_file)
-
-        text_editor = Editor(configfile)
-        output_text = text_editor.edit_text(input_text)
-        text_editor.save_history("history.json")
-
-        subprocess.call(f"mkdir -p {output_dir}", shell=True)
         file_name = input_file.split("/")[-1]
+
+        output_text = text_editor.edit_text(input_text)
+        text_editor.save_history(f"data/history/{file_name.split('.')[0]}_history.json")
+        
         process.write_file(f"{output_dir}/{file_name}", output_text)
 
 
