@@ -1,0 +1,4 @@
+model: "models/em_german_leo_mistral.Q5_0.gguf"
+max_tokens: 6000
+temperature: 0
+top_p: 0

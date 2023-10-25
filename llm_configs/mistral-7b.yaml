@@ -1,7 +1,4 @@
-model: "models/mistral-7b-v0.1.Q4_K_M.gguf"
-max_tokens: 1024
-temperature: 0.1
-top_p: 0.5
-frequency_penalty: 0
-presence_penalty: 0
-stop: None
+model: "models/mistrallite.Q4_K_S.gguf"
+max_tokens: 2048
+temperature: 0.
+top_p: 0.
