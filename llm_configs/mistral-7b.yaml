@@ -1,4 +1,4 @@
-model: "models/mistrallite.Q4_K_S.gguf"
-max_tokens: 2048
+model: "models/em_german_leo_mistral.Q4_K_S.gguf"
+max_tokens: 4096
 temperature: 0.
 top_p: 0.
