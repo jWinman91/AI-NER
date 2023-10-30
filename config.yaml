@@ -1,2 +1,2 @@
-llm_config: "llm_configs/mistral-7b.yaml"
+llm_config: "llm_configs/llama2-7b-32K-instruct.yaml"
 prompt_config: "prompt_configs/anonymize_emails.yaml"
