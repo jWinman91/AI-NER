@@ -1,11 +1,10 @@
-import importlib
 import json
+import re
 import yaml
 
 from collections import OrderedDict
 from llama_cpp import Llama
-from multipledispatch import dispatch
-from typing import List, Optional, Tuple, Dict
+from typing import Set, Dict
 
 
 class Editor:
@@ -19,30 +18,11 @@ class Editor:
         config_dict = self.load_yml(configfile)
 
         self._prompts = self.load_yml(config_dict["prompt_config"])
-
-        params = self.load_yml(config_dict["llm_config"])
-        if params is None or len(params) == 0:
-            self._params = {
-                "model": "ChatGPT",
-                "engine": "generation-davinci-003",
-                "temperature": 0.,
-                "max_tokens": 100,
-                "top_p": 0.5,
-                "frequency_penalty": 0,
-                "presence_penalty": 0,
-                "best_of": 1,
-                "stop": None
-            }
-        else:
-            self._params = params
+        self._params = self.load_yml(config_dict["llm_config"])
 
         self._history_dict = OrderedDict()
 
-        if "ChatGPT" in self._params["model"]:
-            import openai
-            self._params["engine"] = self._params["model"]["engine"]
-        else:
-            self._model = Llama(model_path=self._params["model"], verbose=True, n_ctx=2048)
+        self._model = Llama(model_path=self._params["model"], verbose=True, n_ctx=1024)
         del self._params["model"]
 
     @staticmethod
@@ -59,13 +39,6 @@ class Editor:
                 print(err)
         return data
 
-    def static_prompt(self) -> str:
-        """
-        Adds a static statement to the prompt.
-        :return:
-        """
-        return f"""Gib die Antwort im validen json-Format {{"{self.OUTPUT[:-1]}": [{self.OUTPUT[:-1]}]}} aus:"""
-
     def build_prompt(self, input_text: str, prompt_instruction: dict) -> str:
         """
         Defines prompt statement based on prompts defined in the config file.
@@ -74,13 +47,14 @@ class Editor:
         :return: prompt statement including input text
         """
         context = prompt_instruction["Context"]
+        static_prompt = f"""Gib die {self.OUTPUT[:-1]} im validen json-Format {{"{self.OUTPUT[:-1]}": [{self.OUTPUT[:-1]}]}} aus:"""
 
         if "Examples" in prompt_instruction.keys():
             prompt_str = ""
             for example in prompt_instruction["Examples"].values():
                 output = f"{example['Output']}".replace("'", "\"")
                 prompt_str += f"""
-                {context} {example["Input"]}
+                {context} {static_prompt} {example["Input"]}
                 {self.OUTPUT} {{"{self.OUTPUT[:-1]}": {output}}}
                 """
         else:
@@ -88,13 +62,13 @@ class Editor:
 
         prompt = f"""
           {prompt_str}
-          {context} {input_text}
+          {context} {static_prompt} {input_text}
           {self.OUTPUT}
         """
 
         return prompt
 
-    def get_response(self, prompt_name: str, prompt_instruction: str) -> str:
+    def get_response(self, prompt_name: str, prompt_instruction: str) -> Set[str]:
         """
         Send the prompt with edit instructions and the input text to the LLM and return the edited text.
         :param prompt_name: name of the prompt instruction
@@ -103,16 +77,11 @@ class Editor:
         """
         self._params["prompt"] = prompt_instruction
 
-        if "engine" in self._params:
-            response = openai.Completion.create(
-                **self._params
-            )
-        else:
-            response = self._model(**self._params)
-            
-            print("####################### OUTPUT ###############################")
-            print(response["choices"][0]["text"])
-            print("##############################################################")
+        response = self._model(**self._params)
+
+        print("####################### OUTPUT ###############################")
+        print(response["choices"][0]["text"])
+        print("##############################################################")
         
         response_text = response["choices"][0]["text"].split(self.OUTPUT)[-1].encode("utf-8").decode()
         self._history_dict[prompt_name] = response_text
@@ -120,9 +89,9 @@ class Editor:
             found_values = json.loads(response_text, strict=False)
         except Exception as e:
             print(f"FAILED because of {e}")
-            found_values = {self.OUTPUT[:-1]: "FAILED"}
+            found_values = {self.OUTPUT[:-1]: ["FAILED"]}
 
-        return found_values[self.OUTPUT[:-1]]
+        return set(found_values[self.OUTPUT[:-1]])
 
     def save_history(self, file_name: str):
         """
@@ -135,10 +104,6 @@ class Editor:
         
         self._history_dict = OrderedDict()
 
-    @staticmethod
-    def find_and_replace(self, input_text: str, chars: str):
-        return input_text.replace(chars)
-
     def edit_text(self, input_text: str) -> str:
         """
         Edits input text based on prompt instruction given in config file.
@@ -147,19 +112,24 @@ class Editor:
         """
         self._history_dict[f"input_text"] = input_text
         for prompt_name, prompt_instruction in self._prompts.items():
-            prompt = self.build_prompt(list(self._history_dict.values())[-1], prompt_instruction)
+            unique_patterns = set()
+            input_sentences = re.split(r'[.!?]|[\n]{2}', list(self._history_dict.values())[-1])
+            print(input_sentences)
+            for input_sentence in list(filter(None, input_sentences)):
+                prompt = self.build_prompt(input_sentence, prompt_instruction)
             
-            print("############################ PROMPT ##############################")
-            print(prompt)
-            print("##################################################################")
+                print("############################ PROMPT ##############################")
+                print(prompt)
+                print("##################################################################")
             
-            found_values = self.get_response(f"{prompt_name}", prompt)
+                unique_patterns = unique_patterns.union(self.get_response(f"{prompt_name}", prompt))
 
-            self._history_dict[f"{prompt_name}_found_values"] = found_values
+            self._history_dict[f"{prompt_name}_patterns"] = list(unique_patterns)
 
             output_text = input_text
-            for found_value in found_values:
-                output_text = output_text.replace(found_value, prompt_instruction["replace_token"])
+            unique_patterns.discard("FAILED")
+            for pattern in unique_patterns:
+                output_text = output_text.replace(pattern, prompt_instruction["replace_token"])
 
             self._history_dict[f"{prompt_name}_output_text"] = output_text
 
