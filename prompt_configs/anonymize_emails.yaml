@@ -1,7 +1,7 @@
 Anonymisierung:
   replace_token: ">NAME<"
   Context: >
-        Gib alle Vorkommnisse von Namen aus dem folgenden Text in einer Liste wieder:
+        Gib alle Namen aus dem folgenden Text in einer Liste wieder:
   Examples:
     Example_1:
       Input: >
@@ -18,8 +18,8 @@ Anonymisierung:
         Schicken Sie mir bitte meinen neuen Vertrag zu!
 
         Viele Grüßen,
-        Jens Winkelmann
-      Output: ["Herrn Stroganov", "Jens Winkelmann"]
+        Jens
+      Output: ["Herrn Stroganov", "Jens"]
     Example_3:
       Input: >
         Hallo,
@@ -41,6 +41,23 @@ Anonymisierung:
         Viele Grüße,
         Jessica Mustermann
       Output: ["Herr Ulyanov", "Jessica Mustermann"]
+    Example_5:
+      Input: >
+        Hallo!
+        Kundennummer: 1234043
+
+        Ich habe neulich meinen Fernsehvertrag mit ihnen erneuert.
+        Mir ist dabei aufgefallen, dass sie mir zweimal Geld vom Konto buchen, einmal 45€ und einmal 55€.
+        Wieso genau zahl ich jetzt 100€ im monat?
+
+        Ich hab mal meinen Bankauszüge mit angehangen. Ich weiß nicht, an wen ich mich sonst wenden soll...
+        Ihr Customer Support am Telefon konnte mir auch nicht weiterhelfen.
+        Ich hoffe Sie können mir helfen, sonst muss ich meinen Vertrag leider kündigen.
+
+        Mit freundlichen Grüße,
+        Sibille Neumann
+      Output: ["Sibille Neumann"]
+
 
         
 #Kundennummern:

@@ -9,7 +9,7 @@ from typing import List, Optional, Tuple, Dict
 
 
 class Editor:
-    OUTPUT = "Antwort:"
+    OUTPUT = "Ausgabe:"
     
     def __init__(self, configfile: str):
         """
