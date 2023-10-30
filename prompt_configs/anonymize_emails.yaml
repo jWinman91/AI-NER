@@ -1,62 +1,41 @@
 Anonymisierung:
   replace_token: ">NAME<"
   Context: >
-        Gib alle Namen aus dem folgenden Text in einer Liste wieder:
+        Gib nur alle Namen aus dem folgenden Text in einer Liste wieder und
   Examples:
     Example_1:
       Input: >
-        Lieber Dr Winkelmann,
-        Mein Name ist Oli Sharif. Können Sie mir ein Exemplar Ihres Buches zukommen lassen?
-        
-        mit freundlichen Grüßen,
-        Oli Sharif
-      Output: ["Dr Winkelmann", "Oli Sharif"]
+        Lieber Dr Winkelmann
+      Output: ["Winkelmann"]
     Example_2:
       Input: >
-        Sehr geehrte Damen und Herren,
-        ich hatte am Telefon bereits mit Herrn Stroganov gesprochen.
-        Schicken Sie mir bitte meinen neuen Vertrag zu!
-
-        Viele Grüßen,
-        Jens
-      Output: ["Herrn Stroganov", "Jens"]
+        Mein Name ist Oli Sharif
+      Output: ["Oli Sharif"]
     Example_3:
       Input: >
-        Hallo,
-        mein Name ist Hainer. Ich habe eine Frage zu meinem DSL-Vertrag.
-        Bitte rufen Sie mich unter folgender Nummer zurück: 01739484727405.
-        
-        Mfg
-        Hainer Müller
-      Output: ["Hainer", "Hainer Müller"]
+        Sehr geehrte Damen und Herren
+      Output: []
     Example_4:
+      Input: >
+        Mit freundlichen Grüßen, Jens Winkelmann
+      Output: ["Jens Winkelmann"]
+    Example_5:
+      Input: >
+        Viele Grüße,
+        Hainer Müller
+      Output: ["Hainer Müller"]
+    Example_6:
+      Input: >
+        ich hatte am Telefon bereits mit Herrn Stroganov gesprochen
+      Output: ["Stroganov"]
+    Example_7:
       Input: >
         Name: Jessica Mustermann
         Kundennummer: 1234043
-        
         Guten Tag Herr Ulyanov,
-        ich möchte mich über den schlechten Service ihrer Firma beschweren.
-        Seit Tagen habe ich kein Internet. Bitte klären Sie das.
-        
-        Viele Grüße,
-        Jessica Mustermann
-      Output: ["Herr Ulyanov", "Jessica Mustermann"]
-    Example_5:
-      Input: >
-        Hallo!
-        Kundennummer: 1234043
+        ich möchte mich über den schlechten Service ihrer Firma beschweren
 
-        Ich habe neulich meinen Fernsehvertrag mit ihnen erneuert.
-        Mir ist dabei aufgefallen, dass sie mir zweimal Geld vom Konto buchen, einmal 45€ und einmal 55€.
-        Wieso genau zahl ich jetzt 100€ im monat?
-
-        Ich hab mal meinen Bankauszüge mit angehangen. Ich weiß nicht, an wen ich mich sonst wenden soll...
-        Ihr Customer Support am Telefon konnte mir auch nicht weiterhelfen.
-        Ich hoffe Sie können mir helfen, sonst muss ich meinen Vertrag leider kündigen.
-
-        Mit freundlichen Grüße,
-        Sibille Neumann
-      Output: ["Sibille Neumann"]
+      Output: ["Ulyanov", "Jessica Mustermann"]
 
 
         
