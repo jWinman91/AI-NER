@@ -3,6 +3,7 @@ import re
 import yaml
 
 from collections import OrderedDict
+from nltk import tokenize
 from llama_cpp import Llama
 from typing import Set, Dict
 
@@ -22,7 +23,7 @@ class Editor:
 
         self._history_dict = OrderedDict()
 
-        self._model = Llama(model_path=self._params["model"], verbose=True, n_ctx=1024)
+        self._model = Llama(model_path=self._params["model"], n_threads=4, verbose=True, n_ctx=2048)
         del self._params["model"]
 
     @staticmethod
@@ -113,7 +114,7 @@ class Editor:
         self._history_dict[f"input_text"] = input_text
         for prompt_name, prompt_instruction in self._prompts.items():
             unique_patterns = set()
-            input_sentences = re.split(r'[.!?]|[\n]{2}', list(self._history_dict.values())[-1])
+            input_sentences = tokenize.sent_tokenize(list(self._history_dict.values())[-1])
             print(input_sentences)
             for input_sentence in list(filter(None, input_sentences)):
                 prompt = self.build_prompt(input_sentence, prompt_instruction)

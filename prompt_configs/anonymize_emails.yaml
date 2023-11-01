@@ -1,7 +1,8 @@
 Anonymisierung:
   replace_token: ">NAME<"
   Context: >
-        Gib nur alle Namen aus dem folgenden Text in einer Liste wieder und
+    Extrahiere alle Namen aus dem folgenden Text.
+    Gib die Namen in einer Liste aus.
   Examples:
     Example_1:
       Input: >
@@ -17,7 +18,9 @@ Anonymisierung:
       Output: []
     Example_4:
       Input: >
-        Mit freundlichen Grüßen, Jens Winkelmann
+        Mit freundlichen Grüßen,
+
+        Jens Winkelmann
       Output: ["Jens Winkelmann"]
     Example_5:
       Input: >
@@ -34,9 +37,35 @@ Anonymisierung:
         Kundennummer: 1234043
         Guten Tag Herr Ulyanov,
         ich möchte mich über den schlechten Service ihrer Firma beschweren
-
       Output: ["Ulyanov", "Jessica Mustermann"]
+    Example_8:
+      Input: >
+        Ich bin bei Vodafone schon seit 20 Jahren Kunde
+      Output: []
+    Example_9:
+      Input: >
+        Viele Grüße,
 
+        Sabrina N.
+      Output: ["Sabrina N."]
+    Example_10:
+      Input: >
+        Julia Meier hat gestern einen neuen Vertrag unterzeichnet.
+      Output: ["Julia Meier"]
+    Example_11:
+      Input: >
+        Sehr geehrtes Support-Team,
+
+        ich hoffe, Sie können mir bei einem Problem weiterhelfen, das ich mit Ihrem Produkt habe
+      Output: []
+    Example_12:
+      Input: >
+        Mein Name ist Michael Anderson und ich vertrete 1&1,
+        ein aufstrebendes Unternehmen, das sich auf Telekommunikation spezialisiert hat
+        und ich schreibe Ihnen, um nähere Informationen bezüglich Ihrer Produktpalette,
+        deren Verfügbarkeit sowie etwaiger Mengenrabatte oder Sonderkonditionen für Großbestellungen zu erfragen,
+        da wir derzeit auf der Suche nach zuverlässigen Lieferanten für eine langfristige Geschäftspartnerschaft sind
+      Output: ["Michael Anderson"]
 
         
 #Kundennummern:
