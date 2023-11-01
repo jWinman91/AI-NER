@@ -16,8 +16,8 @@ To use the AI-NER , follow these steps:
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd <repository-directory>
+git clone https://github.com/jWinman91/ai-extractor.git
+cd ai-extractor
 ```
 2. Install the required dependencies:
 ```bash
@@ -34,6 +34,14 @@ In order to use this repository, several configuration need to be set.
 
 You can simply use AI-NER by following these steps:
 
+````bash
+python main.py
+````
+
+## Example
+
+An example text file is added in `data/input/email_example_de.txt`, which is a random email.
+By applying AI-NER to this file, we can now anonymize all names and locations in this email.
 
 ## License
 
