@@ -32,7 +32,7 @@ def main(input_files: List[str], output_dir: str, configfile: str = "config.yaml
 
 if __name__ == "__main__":
     if len(sys.argv[1:]) == 0:
-        input_files = "data/input/Brief*.txt"
+        input_files = "data/input/email_*de.txt"
         output_dir = "data/output"
     else:
         input_files = sys.argv[1]

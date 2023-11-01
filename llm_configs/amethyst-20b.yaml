@@ -1,7 +1,0 @@
-model: "models/u-amethyst-20b.Q4_K_M.gguf"
-max_tokens: 2048
-temperature: 0.5
-top_p: 0.5
-frequency_penalty: 0
-presence_penalty: 0
-stop: None
