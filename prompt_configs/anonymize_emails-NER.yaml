@@ -1,0 +1,6 @@
+Anonymisierung_Name:
+  replace_token: ">NAME<"
+  entity_type: "I-PER"
+Anonymisierung_Ort:
+  replace_token: ">ORT<"
+  entity_type: "I-LOC"

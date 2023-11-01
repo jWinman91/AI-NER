@@ -1,0 +1,2 @@
+tokenizer: "xlm-roberta-large-finetuned-conll03-english"
+model: "xlm-roberta-large-finetuned-conll03-english"
