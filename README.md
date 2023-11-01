@@ -32,7 +32,7 @@ In order to use this repository, several configuration need to be set.
 
 ## Usage
 
-You can simply use AI-NER by following these steps:
+You can simply use AI-NER by running:
 
 ````bash
 python main.py
