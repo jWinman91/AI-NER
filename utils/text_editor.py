@@ -11,7 +11,7 @@ from typing import Dict
 class Editor:
     def __init__(self, configfile: str):
         """
-        Class to edit input text by using an LLM.
+        Class to edit input text by using a Language Model.
         :param configfile: path to config file that defines location of config files
         """
         config_dict = self.load_yml(configfile)
@@ -29,9 +29,9 @@ class Editor:
     @staticmethod
     def load_yml(configfile: str) -> Dict:
         """
-        Imports the yml Configuration file
-        :param configfile: path to the config file
-        :return: a Dictionary
+        Imports a YAML Configuration file
+        :param configfile: Path to the YAML config file.
+        :return: A dictionary containing the configuration data.
         """
         with open(configfile, "r") as b:
             try:
@@ -43,9 +43,9 @@ class Editor:
 
     def save_history(self, file_name: str):
         """
-        Saves the history dictionary that contains all edits to the input text.
-        :param file_name: Name of file where to save history
-        :return:
+        Saves the history dictionary containing all edits to the input text.
+        :param file_name: Name of file where to save the history
+        :return: None
         """
         with open(file_name, "w+", encoding="utf8") as f:
             f.write(json.dumps(self._history_dict,
@@ -58,9 +58,9 @@ class Editor:
 
     def edit_text(self, input_text: str) -> str:
         """
-        Edits input text based on prompt instruction given in config file.
-        :param input_text: Input text
-        :return: edited input text
+        Edits the input text based on instructions provided in the configuration file.
+        :param input_text: Input text to be edited
+        :return: Edited input text
         """
         self._history_dict[f"input_text"] = input_text
         for prompt_name, prompt_instruction in self._prompts.items():

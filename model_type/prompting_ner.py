@@ -8,14 +8,13 @@ class PromptingModel:
 
     def __init__(self, params):
         """
-
-        :param prompts:
-        :param params:
+        Class for using an LLM for name entity recognition.
+        :param params: parameters for the LLM
         """
         self._model = Llama(model_path=params.get("model", "models/em_german_leo_mistral.Q5_0.gguf"),
                             n_threads=params.get("n_threads", 2),
                             verbose=params.get("verbose", False),
-                            n_ctx=params.get("n_ctx", 1024)
+                            n_ctx=params.get("n_ctx", 2048)
                             )
 
         for param in ["model", "n_threads", "verbose", "n_ctx"]:
@@ -53,15 +52,13 @@ class PromptingModel:
 
         return prompt
 
-    def get_response(self, prompt_dict: dict) -> Tuple[Set[str], str]:
+    def get_response(self, prompt: str) -> Tuple[Set[str], str]:
         """
         Send the prompt with edit instructions and the input text to the LLM and return the edited text.
-        :param prompt_name: name of the prompt instruction
-        :param prompt_instruction: instruction of the prompt
-        :param history_dict: dictionary to log the history
+        :param prompt: prompt for the LLM
         :return: edited text and response text
         """
-        self._params["prompt"] = prompt_dict
+        self._params["prompt"] = prompt
 
         response = self._model(**self._params)
 
@@ -75,12 +72,18 @@ class PromptingModel:
         return set(found_values[self.OUTPUT[:-1]]), response_text
 
     def find_name_entity(self, input_sentence: str, prompt_key: str, prompt_dict: dict, history_dict: dict) -> List[str]:
+        """
+        Entry function of the class. It builds the prompt, runs the request for the LLM and returns the entities that
+        were found by the LLM in the sentence.
+        :param input_sentence: tokenized sentence
+        :param prompt_key: name of the prompt, e.g. anonymize
+        :param prompt_dict: parameters for the prompt
+        :param history_dict: dictionary to log response
+        :return: list of all found entities
+        """
         prompt = self.build_prompt(input_sentence, prompt_dict)
 
-        found_entities, response_text = self.get_response(prompt_dict)
+        found_entities, response_text = self.get_response(prompt)
         history_dict[prompt_key] = response_text
 
         return list(found_entities)
-
-
-
