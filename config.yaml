@@ -1,4 +1,4 @@
-llm_config: "llm_configs/roberta_finetuned.yaml"
-prompt_config: "prompt_configs/anonymize_emails-NER.yaml"
+llm_config: "config_llm/roberta_finetuned.yaml"
+prompt_config: "config_prompt/anonymize_emails-NER.yaml"
 module_name: "fine-tuned_ner"
 model_type: "NERModel"
