@@ -1,6 +1,13 @@
 Anonymisierung_Name:
+  model_type: "ner_model/RobertaModel"
   replace_token: ">NAME<"
   entity_type: "I-PER"
 Anonymisierung_Ort:
+  model_type: "ner_model/RobertaModel"
   replace_token: ">ORT<"
   entity_type: "I-LOC"
+Anonymisierung_Zahl:
+  model_type: "regex_model/Regex"
+  pattern: "\\d"
+  replace_token: "1"
+
