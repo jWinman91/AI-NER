@@ -1,6 +1,6 @@
-import nltk
-
 from transformers import pipeline, AutoTokenizer, AutoModelForTokenClassification
+from flair.data import Sentence
+from flair.models import SequenceTagger
 from typing import List
 
 
@@ -54,9 +54,44 @@ class RobertaModel:
         else:
             history_dict[prompt_key].extend(response)
 
-        found_entities = set()
-        for entity in response:
-            if entity["entity"] == prompt_dict["entity_type"]:
-                found_entities.add(entity["word"].replace(u"\u2581", " ").strip())
+        found_entities = set([entity["word"].replace(u"\u2581", " ").strip() \
+                              for entity in response
+                              if entity["entity"] == prompt_dict["entity_type"]])
 
         return list(found_entities)
+
+
+class FlairModel:
+    def __init__(self, params):
+        self._tagger = SequenceTagger.load(params["model"])
+
+    def find_name_entity(self, input_sentence: str, prompt_key: str, prompt_dict: dict, history_dict: dict) -> List[
+        str]:
+        """
+        Finds name entities in the input sentence based on the NER model and updates the history dictionary.
+
+        :param input_sentence: The input sentence to find entities in.
+        :param prompt_key: The key associated with the prompt in the history dictionary.
+        :param prompt_dict: A dictionary containing prompt information, including 'entity_type'.
+        :param history_dict: A dictionary to store the history of found entities.
+        :return: A list of found entities in the input sentence.
+        """
+        sentence = Sentence(input_sentence)
+        self._tagger.predict(sentence)
+
+        spans = list(map(lambda x: x.to_dict(), sentence.get_spans("ner")))
+
+        if prompt_key not in history_dict:
+            history_dict[prompt_key] = spans
+        else:
+            history_dict[prompt_key].extend(spans)
+
+        found_entities = set([span["text"] for span in spans
+                              if span["labels"][0]["value"] == prompt_dict["entity_type"]])
+
+        return list(found_entities)
+
+
+
+
+
