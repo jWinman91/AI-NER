@@ -15,14 +15,23 @@ class Editor:
         :param configfile: path to config file that defines location of config files
         """
         config_dict = self.load_yml(configfile)
-        module_name = "model_type." + config_dict.get("module_name", "fine-tuned_ner")
-        model_type = config_dict.get("model_type", "NERModel")
 
-        self._prompts = self.load_yml(config_dict["prompt_config"])
-        params = self.load_yml(config_dict["llm_config"])
+        self._prompts = self.load_yml(config_dict["config_prompt"])
 
-        module = importlib.import_module(module_name)
-        self._model_type = getattr(module, model_type)(params)
+        model_types = set()
+        for prompt_name, prompt_dict in self._prompts.items():
+            model_types.add(prompt_dict["model_type"])
+
+        self._model_types = {}
+        for model_type in model_types:
+            module_name = model_type.split("/")[0]
+            model_name = model_type.split("/")[1]
+            param_filename = config_dict["config_model"].get(module_name, None)
+
+            params = self.load_yml(param_filename) if param_filename else {}
+
+            module = importlib.import_module("model_type." + module_name)
+            self._model_types[model_name] = getattr(module, model_name)(params)
 
         self._history_dict = OrderedDict()
 
@@ -39,7 +48,6 @@ class Editor:
             except yaml.YAMLError as err:
                 print(err)
         return data
-
 
     def save_history(self, file_name: str):
         """
@@ -66,13 +74,16 @@ class Editor:
         for prompt_name, prompt_instruction in self._prompts.items():
             unique_patterns = set()
             output_text = list(self._history_dict.values())[-1]
+
             input_sentences = tokenize.sent_tokenize(output_text)
             for input_sentence in list(filter(None, input_sentences)):
-                found_entitites = self._model_type.find_name_entity(input_sentence,
-                                                                    f"{prompt_name}",
-                                                                    prompt_instruction,
-                                                                    self._history_dict)
-                unique_patterns = unique_patterns.union(found_entitites)
+                model_name = prompt_instruction["model_type"].split("/")[-1]
+                find_name_entity = getattr(self._model_types[model_name], "find_name_entity")
+                found_entities = find_name_entity(input_sentence,
+                                                   prompt_name,
+                                                   prompt_instruction,
+                                                   self._history_dict)
+                unique_patterns = unique_patterns.union(found_entities)
 
             self._history_dict[f"{prompt_name}_patterns"] = list(unique_patterns)
 

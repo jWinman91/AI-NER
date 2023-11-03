@@ -4,7 +4,7 @@ from transformers import pipeline, AutoTokenizer, AutoModelForTokenClassificatio
 from typing import List
 
 
-class NERModel:
+class RobertaModel:
     def __init__(self, params):
         """
         Class using a pretrained Name-entity recognition model.
@@ -27,7 +27,9 @@ class NERModel:
         """
         result = [entities[0]]
         for i in range(1, len(entities)):
-            if entities[i - 1]["end"] == entities[i]["start"]:
+            if (entities[i - 1]["end"] == entities[i]["start"] or\
+                entities[i - 1]["end"] == entities[i]["start"] - 1) and\
+                    entities[i - 1]["entity"] == entities[i]["entity"]:
                 result[-1]["word"] += entities[i]["word"]
                 result[-1]["end"] = entities[i]["end"]
             else:
@@ -53,9 +55,8 @@ class NERModel:
             history_dict[prompt_key].extend(response)
 
         found_entities = set()
-        for token in nltk.word_tokenize(input_sentence):
-            for entity in response:
-                if entity["entity"] == prompt_dict["entity_type"] and entity["word"].replace(u"\u2581", "") in token:
-                    found_entities.add(token)
+        for entity in response:
+            if entity["entity"] == prompt_dict["entity_type"]:
+                found_entities.add(entity["word"].replace(u"\u2581", " ").strip())
 
         return list(found_entities)
