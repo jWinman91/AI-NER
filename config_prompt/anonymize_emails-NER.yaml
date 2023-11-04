@@ -1,3 +1,11 @@
+Anonymisierung_Email:
+  model_type: "regex_model/Regex"
+  pattern: \b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b
+  replace_token: "EMAIL@EMAIL.DE"
+Anonymisierung_Zahl:
+  model_type: "regex_model/Regex"
+  pattern: \d
+  replace_token: "1"
 Anonymisierung_Name:
   model_type: "ner_model/FlairModel"
   replace_token: ">NAME<"
@@ -6,8 +14,4 @@ Anonymisierung_Ort:
   model_type: "ner_model/FlairModel"
   replace_token: ">ORT<"
   entity_type: "LOC"
-Anonymisierung_Zahl:
-  model_type: "regex_model/Regex"
-  pattern: "\\d"
-  replace_token: "1"
 
