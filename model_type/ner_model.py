@@ -89,7 +89,7 @@ class FlairModel:
         found_entities = set([span["text"] for span in spans
                               if span["labels"][0]["value"] == prompt_dict["entity_type"]])
 
-        return list(found_entities)
+        return list(filter(lambda x: len(x) > 1, found_entities))
 
 
 
