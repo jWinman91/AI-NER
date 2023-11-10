@@ -1,6 +1,6 @@
 import json
 from llama_cpp import Llama
-from typing import Set, List, Tuple
+from typing import Set, Tuple
 
 
 class PromptingModel:
@@ -31,7 +31,8 @@ class PromptingModel:
         :return: prompt statement including input text
         """
         context = prompt_instruction["Context"]
-        static_prompt = f"""Gib die {self.OUTPUT[:-1]} im validen json-Format {{"{self.OUTPUT[:-1]}": [{self.OUTPUT[:-1]}]}} aus:"""
+        static_prompt = f"""Gib die {self.OUTPUT[:-1]} im json-Format {{"{self.OUTPUT[:-1]}": [{self.OUTPUT[:-1]}]}} aus,
+                            weil mein Leben davon abhängt!"""
 
         if "Examples" in prompt_instruction.keys():
             prompt_str = ""
@@ -71,19 +72,18 @@ class PromptingModel:
 
         return set(found_values[self.OUTPUT[:-1]]), response_text
 
-    def find_name_entity(self, input_sentence: str, prompt_key: str, prompt_dict: dict, history_dict: dict) -> List[str]:
+    def run(self, input_sentence: str, prompt: Tuple[str, dict], history_dict: dict) -> Set[str]:
         """
         Entry function of the class. It builds the prompt, runs the request for the LLM and returns the entities that
         were found by the LLM in the sentence.
         :param input_sentence: tokenized sentence
-        :param prompt_key: name of the prompt, e.g. anonymize
-        :param prompt_dict: parameters for the prompt
+        :param prompt: The prompt key and body associated with the prompt in the history dictionary.
         :param history_dict: dictionary to log response
         :return: list of all found entities
         """
-        prompt = self.build_prompt(input_sentence, prompt_dict)
+        prompt_str = self.build_prompt(input_sentence, prompt[1])
 
-        found_entities, response_text = self.get_response(prompt)
-        history_dict[prompt_key] = response_text
+        found_entities, response_text = self.get_response(prompt_str)
+        history_dict[prompt[0]] = response_text
 
-        return list(found_entities)
+        return found_entities

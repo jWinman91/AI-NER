@@ -4,7 +4,6 @@ import json
 import yaml
 
 from collections import OrderedDict
-from nltk import tokenize
 from typing import Dict
 
 
@@ -14,24 +13,21 @@ class Editor:
         Class to edit input text by using a Language Model.
         :param configfile: path to config file that defines location of config files
         """
-        config_dict = self.load_yml(configfile)
+        self._prompts = self.load_yml(configfile)
 
-        self._prompts = self.load_yml(config_dict["config_prompt"])
-
-        model_types = set()
+        self._model_wrappers = dict()
         for prompt_name, prompt_dict in self._prompts.items():
-            model_types.add(prompt_dict["model_type"])
-
-        self._model_types = {}
-        for model_type in model_types:
-            module_name = model_type.split("/")[0]
-            model_name = model_type.split("/")[1]
-            param_filename = config_dict["config_model"].get(module_name, None)
-
+            model = prompt_dict["model"]
+            module_name = model["model_wrapper"].split("/")[0]
+            model_name = model["model_wrapper"].split("/")[1]
+            param_filename = model.get("model_config", None)
             params = self.load_yml(param_filename) if param_filename else {}
 
-            module = importlib.import_module("model_type." + module_name)
-            self._model_types[model_name] = getattr(module, model_name)(params)
+            if model_name in self._model_wrappers.keys():
+                continue
+
+            module = importlib.import_module("model_wrapper." + module_name)
+            self._model_wrappers[model_name] = getattr(module, model_name)(params)
 
         self._history_dict = OrderedDict()
 
@@ -71,26 +67,19 @@ class Editor:
         :return: Edited input text
         """
         self._history_dict[f"input_text"] = input_text
-        for prompt_name, prompt_instruction in self._prompts.items():
-            unique_patterns = set()
+        for prompt in self._prompts.items():
             output_text = list(self._history_dict.values())[-1]
+            model_name = prompt[1]["model"]["model_wrapper"].split("/")[-1]
 
-            input_sentences = tokenize.sent_tokenize(output_text)
-            for input_sentence in list(filter(None, input_sentences)):
-                model_name = prompt_instruction["model_type"].split("/")[-1]
-                find_name_entity = getattr(self._model_types[model_name], "find_name_entity")
-                found_entities = find_name_entity(input_sentence,
-                                                   prompt_name,
-                                                   prompt_instruction,
-                                                   self._history_dict)
-                unique_patterns = unique_patterns.union(found_entities)
+            run_model_wrapper = getattr(self._model_wrappers[model_name], "run")
+            unique_patterns = run_model_wrapper(output_text, prompt, self._history_dict)
 
-            self._history_dict[f"{prompt_name}_patterns"] = list(unique_patterns)
+            self._history_dict[f"{prompt[0]}_patterns"] = list(unique_patterns)
 
             unique_patterns.discard("FAILED")
             for pattern in unique_patterns:
-                output_text = output_text.replace(pattern, prompt_instruction["replace_token"])
+                output_text = output_text.replace(pattern, prompt[1]["replace_token"])
 
-            self._history_dict[f"{prompt_name}_output_text"] = output_text
+            self._history_dict[f"{prompt[0]}_output_text"] = output_text
 
         return list(self._history_dict.values())[-1]

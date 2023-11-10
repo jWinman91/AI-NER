@@ -1,10 +1,11 @@
+from model_wrapper.abstract_model_wrapper import AbstractNERModel
 from transformers import pipeline, AutoTokenizer, AutoModelForTokenClassification
 from flair.data import Sentence
 from flair.models import SequenceTagger
-from typing import List
+from typing import Set, Tuple
 
 
-class RobertaModel:
+class RobertaModel(AbstractNERModel):
     def __init__(self, params):
         """
         Class using a pretrained Name-entity recognition model.
@@ -36,43 +37,40 @@ class RobertaModel:
                 result.append(entities[i])
         return result
 
-    def find_name_entity(self, input_sentence: str, prompt_key: str, prompt_dict: dict, history_dict: dict) -> List[str]:
+    def find_name_entities(self, input_sentence: str, prompt: Tuple[str, dict], history_dict: dict) -> Set[str]:
         """
         Finds name entities in the input sentence based on the NER model and updates the history dictionary.
 
         :param input_sentence: The input sentence to find entities in.
-        :param prompt_key: The key associated with the prompt in the history dictionary.
-        :param prompt_dict: A dictionary containing prompt information, including 'entity_type'.
+        :param prompt: The prompt key and body associated with the prompt in the history dictionary.
         :param history_dict: A dictionary to store the history of found entities.
         :return: A list of found entities in the input sentence.
         """
         response = self._classifier(input_sentence)
         response = self.merge_entities(response)
 
-        if prompt_key not in history_dict:
-            history_dict[prompt_key] = response
+        if prompt[0] not in history_dict:
+            history_dict[prompt[0]] = response
         else:
-            history_dict[prompt_key].extend(response)
+            history_dict[prompt[0]].extend(response)
 
         found_entities = set([entity["word"].replace(u"\u2581", " ").strip() \
                               for entity in response
-                              if entity["entity"] == prompt_dict["entity_type"]])
+                              if entity["entity"] == prompt[1]["entity_type"]])
 
-        return list(found_entities)
+        return found_entities
 
 
-class FlairModel:
+class FlairModel(AbstractNERModel):
     def __init__(self, params):
         self._tagger = SequenceTagger.load(params["model"])
 
-    def find_name_entity(self, input_sentence: str, prompt_key: str, prompt_dict: dict, history_dict: dict) -> List[
-        str]:
+    def find_name_entities(self, input_sentence: str, prompt: Tuple[str, dict], history_dict: dict) -> Set[str]:
         """
         Finds name entities in the input sentence based on the NER model and updates the history dictionary.
 
         :param input_sentence: The input sentence to find entities in.
-        :param prompt_key: The key associated with the prompt in the history dictionary.
-        :param prompt_dict: A dictionary containing prompt information, including 'entity_type'.
+        :param prompt: The prompt key and body associated with the prompt in the history dictionary.
         :param history_dict: A dictionary to store the history of found entities.
         :return: A list of found entities in the input sentence.
         """
@@ -81,15 +79,15 @@ class FlairModel:
 
         spans = list(map(lambda x: x.to_dict(), sentence.get_spans("ner")))
 
-        if prompt_key not in history_dict:
-            history_dict[prompt_key] = spans
+        if prompt[0] not in history_dict:
+            history_dict[prompt[0]] = spans
         else:
-            history_dict[prompt_key].extend(spans)
+            history_dict[prompt[0]].extend(spans)
 
         found_entities = set([span["text"] for span in spans
-                              if span["labels"][0]["value"] == prompt_dict["entity_type"]])
+                              if span["labels"][0]["value"] == prompt[1]["entity_type"]])
 
-        return list(filter(lambda x: len(x) > 1, found_entities))
+        return set(filter(lambda x: len(x) > 1, found_entities))
 
 
 
