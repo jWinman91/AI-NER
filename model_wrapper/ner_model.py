@@ -2,11 +2,11 @@ from model_wrapper.abstract_model_wrapper import AbstractNERModel
 from transformers import pipeline, AutoTokenizer, AutoModelForTokenClassification
 from flair.data import Sentence
 from flair.models import SequenceTagger
-from typing import Set, Tuple
+from typing import Set, Tuple, List
 
 
 class RobertaModel(AbstractNERModel):
-    def __init__(self, params):
+    def __init__(self, params: dict):
         """
         Class using a pretrained Name-entity recognition model.
 
@@ -19,7 +19,7 @@ class RobertaModel(AbstractNERModel):
         self._classifier = pipeline("ner", model=model, tokenizer=tokenizer)
 
     @staticmethod
-    def merge_entities(entities):
+    def merge_entities(entities: List[dict]):
         """
         Merges consecutive entities with overlapping boundaries.
 
@@ -49,10 +49,7 @@ class RobertaModel(AbstractNERModel):
         response = self._classifier(input_sentence)
         response = self.merge_entities(response)
 
-        if prompt[0] not in history_dict:
-            history_dict[prompt[0]] = response
-        else:
-            history_dict[prompt[0]].extend(response)
+        self.historize_response(prompt, response, history_dict)
 
         found_entities = set([entity["word"].replace(u"\u2581", " ").strip() \
                               for entity in response
@@ -62,7 +59,7 @@ class RobertaModel(AbstractNERModel):
 
 
 class FlairModel(AbstractNERModel):
-    def __init__(self, params):
+    def __init__(self, params: dict):
         self._tagger = SequenceTagger.load(params["model"])
 
     def find_name_entities(self, input_sentence: str, prompt: Tuple[str, dict], history_dict: dict) -> Set[str]:
@@ -79,10 +76,7 @@ class FlairModel(AbstractNERModel):
 
         spans = list(map(lambda x: x.to_dict(), sentence.get_spans("ner")))
 
-        if prompt[0] not in history_dict:
-            history_dict[prompt[0]] = spans
-        else:
-            history_dict[prompt[0]].extend(spans)
+        self.historize_response(prompt, spans, history_dict)
 
         found_entities = set([span["text"] for span in spans
                               if span["labels"][0]["value"] == prompt[1]["entity_type"]])
