@@ -1,17 +1,23 @@
 Anonymisierung_Email:
-  model_type: "regex_model/Regex"
+  model:
+    model_wrapper: "regex_model/Regex"
   pattern: \b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b
   replace_token: "EMAIL@EMAIL.DE"
 Anonymisierung_Zahl:
-  model_type: "regex_model/Regex"
+  model:
+    model_wrapper: "regex_model/Regex"
   pattern: \d
   replace_token: "1"
 Anonymisierung_Name:
-  model_type: "ner_model/FlairModel"
+  model:
+    model_wrapper: "ner_model/FlairModel"
+    model_config: "config_model/flair.yaml"
   replace_token: ">NAME<"
   entity_type: "PER"
 Anonymisierung_Ort:
-  model_type: "ner_model/FlairModel"
+  model:
+    model_wrapper: "ner_model/FlairModel"
+    model_config: "config_model/flair.yaml"
   replace_token: ">ORT<"
   entity_type: "LOC"
 

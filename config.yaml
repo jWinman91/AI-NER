@@ -1,3 +1,0 @@
-config_model:
-  ner_model: "config_model/flair.yaml"
-config_prompt: "config_prompt/anonymize_emails-NER.yaml"

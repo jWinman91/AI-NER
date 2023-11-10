@@ -7,7 +7,7 @@ from utils.text_editor import Editor
 from typing import List
 
 
-def main(input_files: List[str], output_dir: str, configfile: str = "config.yaml"):
+def main(input_files: List[str], output_dir: str, configfile: str = "config_prompt/anonymize_emails-PROMPT.yaml"):
     """
     Runs the email editor from the config file.
     :param input_files: List of files of emails
