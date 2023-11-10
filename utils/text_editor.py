@@ -21,7 +21,7 @@ class Editor:
             module_name = model["model_wrapper"].split("/")[0]
             model_name = model["model_wrapper"].split("/")[1]
             param_filename = model.get("model_config", None)
-            if param_filename.endswith(".yaml"):
+            if param_filename and param_filename.endswith(".yaml"):
                 params = self.load_yml(param_filename) if param_filename else {}
             else:
                 params = param_filename
