@@ -2,6 +2,7 @@ from model_wrapper.abstract_model_wrapper import AbstractNERModel
 from types import Tuple, Set
 from spacy_llm.util import assemble
 
+
 class SpacyWrapper(AbstractNERModel):
     def __init__(self, config_path: str):
         """
