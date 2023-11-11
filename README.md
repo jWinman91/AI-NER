@@ -40,7 +40,7 @@ pip install -r requirements.txt
 
 In order to use this repository, several configuration need to be set.
 
-^^TODO^^
+**TODO**
 
 ## Usage
 
@@ -50,7 +50,7 @@ You can simply use AI-NER by running:
 python main.py $PATH_TO_INPUT $PATH_TO_OUTPUT
 ````
 
-^^TODO^^
+**TODO**
 
 ## Example
 
