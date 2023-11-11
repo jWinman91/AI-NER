@@ -7,8 +7,18 @@ It allows users to apply various editing prompts and various models defined in c
 Currently, the editing prompts are written to recognize and replace name entities such as names or locations from free text
 and replaces all occurrences with a placeholder defined in the prompt config file.
 
-It functions in a way like a smart editor.
+This project aims to stay model agnostic (i.e. it can be used with a model of the user's choice) and therefore avoid any vendor lock-in. 
+
+This software functions in a way like a smart editor.
 E.g. it can anonymize names in a text or exchange name entities for a batch of emails.
+
+## Table of Contents
+
+- [Installation](#Installation)
+- [Configuration](#Configuration)
+- [Usage](#Usage)
+- [Example](#Example)
+- [License](#license)
 
 ## Installation
 
@@ -30,18 +40,29 @@ pip install -r requirements.txt
 
 In order to use this repository, several configuration need to be set.
 
+^^TODO^^
+
 ## Usage
 
 You can simply use AI-NER by running:
 
 ````bash
-python main.py
+python main.py $PATH_TO_INPUT $PATH_TO_OUTPUT
 ````
+
+^^TODO^^
 
 ## Example
 
-An example text file is added in `data/input/email_example_de.txt`, which is a random email.
+An example text file is added in `data/input/email_example_de.txt`, which is a self-written email in German.
 By applying AI-NER to this file, we can now anonymize all names and locations in this email.
+
+Below are an image of before and after running `python main.py` on the email using the `anonymize_emails-NER.yaml` config file.
+
+<div style="display: flex; justify-content: space-between;">
+  <img src="data/images_examples/email_before_de.png" alt="Email before" width="48%" />
+  <img src="data/images_examples/email_after_de.png" alt="Email after" width="48%" />
+</div>
 
 ## License
 
