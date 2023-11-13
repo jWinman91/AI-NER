@@ -3,11 +3,21 @@ Anonymisierung_Email:
     model_wrapper: "regex_model/Regex"
   pattern: \b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b
   replace_token: "EMAIL@EMAIL.DE"
-Anonymisierung_Zahl:
+Anonymisierung_Datum:
   model:
     model_wrapper: "regex_model/Regex"
-  pattern: \d
-  replace_token: "1"
+  pattern: (?:[0-2][0-9]|[1-9]|30|31)[.\\/,\\s](?:0?[1-9]|10|11|12)(?:(?:[.\\/,\\s](?:[1-2][0-9])?(?:[0-9]{2}))|[.\\/,]|\\b)
+  replace_token: ">DATUM<"
+Anonymisierung_IBAN:
+  model:
+    model_wrapper: "regex_model/Regex"
+  pattern: \b[A-Z]{2}\d{2}[ \-]?\d{4}[ \-]?\d{4}[ \-]?\d{4}[ \-]?\d{4}[ \-]?\d{0,2}\b
+  replace_token: ">IBAN<"
+Anonymisierung_PLZ:
+  model:
+    model_wrapper: "regex_model/Regex"
+  pattern: \b\d{5}\b
+  replace_token: ">PLZ<"
 Anonymisierung_Name:
   model:
     model_wrapper: "ner_model/FlairModel"
