@@ -1,4 +1,4 @@
-model: "models/em_german_leo_mistral.Q5_0.gguf"
-max_tokens: 6000
+model: "models/sauerkrautlm-7b-v1-mistral.Q4_K_M.gguf"
+max_tokens: 2000
 temperature: 0
 top_p: 0
