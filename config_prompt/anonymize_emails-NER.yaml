@@ -18,6 +18,42 @@ Anonymisierung_PLZ:
     model_wrapper: "regex_model/Regex"
   pattern: \b\d{5}\b
   replace_token: ">PLZ<"
+Anonymisierung_PhoneNo:
+  model:
+    model_wrapper: "llm_model/PromptingModel"
+    model_config: "config_model/german-mistral.yaml"
+  replace_token: ">PHONE_NO<"
+  Context: >
+    Extrahiere alle Telefonnummern aus dem folgenden Text und gib die Telefonnummern als Liste [] zurück.
+  Examples:
+    Example_0:
+      Input: >
+        Meine Telefonnummer ist 01525859340.
+      Output: ["01525859340"]
+    Example_1:
+      Input: >
+        Telefonnr: +4920139484
+      Output: ["+4920139484"]
+    Example_2:
+      Input: >
+        Meine Tel.-Nr. lautet: 0211 635533-55
+      Output: ["0211 635533-55"]
+Anonymisierung_KundenNr:
+  model:
+    model_wrapper: "llm_model/PromptingModel"
+    model_config: "config_model/german-mistral.yaml"
+  replace_token: ">CUSTOMER_ID<"
+  Context: >
+    Extrahiere alle Kundennummern aus dem folgenden Text und gib die Kundennummern als Liste [] zurück.
+  Examples:
+    Example_0:
+      Input: >
+        Meine Kunden-Nr lautet 277344021.
+      Output: ["277344021"]
+    Example_1:
+      Input: >
+        Kunden-Nr.: 5584930
+      Output: ["5584930"]
 Anonymisierung_Name:
   model:
     model_wrapper: "ner_model/FlairModel"
