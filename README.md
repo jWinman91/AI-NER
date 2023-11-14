@@ -38,8 +38,9 @@ pip install -r requirements.txt
    * [flair/ner-german-large](https://huggingface.co/flair/ner-german-large)
    * [roberta-large-NER](https://huggingface.co/51la5/roberta-large-NER)
    * [sauerkraut-7b](https://huggingface.co/TheBloke/SauerkrautLM-7B-v1-mistral-GGUF).
-   Each model can be downloaded by using wget, e.g.:
-   ```wget https://huggingface.co/TheBloke/SauerkrautLM-7B-v1-mistral-GGUF/resolve/main/sauerkrautlm-7b-v1-mistral.Q4_0.gguf```
+   
+Each model can be downloaded by using wget, e.g.:
+```wget https://huggingface.co/TheBloke/SauerkrautLM-7B-v1-mistral-GGUF/resolve/main/sauerkrautlm-7b-v1-mistral.Q4_0.gguf```
 
 ## Configuration
 
