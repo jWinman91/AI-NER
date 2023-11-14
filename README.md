@@ -35,9 +35,9 @@ pip install -r requirements.txt
 ```
 
 3. Download a model of your choice into `models`. I recommend the following models from [Hugging Face](https://huggingface.co/) for German text:
-   a. [flair/ner-german-large](https://huggingface.co/flair/ner-german-large)
-   b. [roberta-large-NER](https://huggingface.co/51la5/roberta-large-NER)
-   c. [sauerkraut-7b](https://huggingface.co/TheBloke/SauerkrautLM-7B-v1-mistral-GGUF).
+   * [flair/ner-german-large](https://huggingface.co/flair/ner-german-large)
+   * [roberta-large-NER](https://huggingface.co/51la5/roberta-large-NER)
+   * [sauerkraut-7b](https://huggingface.co/TheBloke/SauerkrautLM-7B-v1-mistral-GGUF).
    Each model can be downloaded by using wget, e.g.:
    ```wget https://huggingface.co/TheBloke/SauerkrautLM-7B-v1-mistral-GGUF/resolve/main/sauerkrautlm-7b-v1-mistral.Q4_0.gguf```
 
