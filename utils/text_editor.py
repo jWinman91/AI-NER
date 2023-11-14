@@ -21,10 +21,13 @@ class Editor:
             module_name = model["model_wrapper"].split("/")[0]
             model_name = model["model_wrapper"].split("/")[1]
             param_filename = model.get("model_config", None)
+            
             if param_filename and param_filename.endswith(".yaml"):
-                params = self.load_yml(param_filename) if param_filename else {}
+                params = self.load_yml(param_filename)
+            elif param_filename and param_filename.endswith(".json"):
+                params = self.load_json(param_filename) 
             else:
-                params = param_filename
+                params = param_filename if param_filename else {}
 
             if model_name in self._model_wrappers.keys():
                 continue
