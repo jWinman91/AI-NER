@@ -60,8 +60,8 @@ By applying AI-NER to this file, we can now anonymize all names and locations in
 Below are an image of before and after running `python main.py` on the email using the `anonymize_emails-NER.yaml` config file.
 
 <div style="display: flex; justify-content: space-between;">
-  <img src="data/images_examples/email_before_de.png" alt="Email before" width="52%" />
-  <img src="data/images_examples/email_after_de.png" alt="Email after" width="52%" />
+  <img src="data/images_examples/email_before_de.png" alt="Email before" width="85%" />
+  <img src="data/images_examples/email_after_de.png" alt="Email after" width="85%" />
 </div>
 
 ## License
