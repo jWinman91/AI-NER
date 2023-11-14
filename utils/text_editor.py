@@ -48,6 +48,20 @@ class Editor:
                 print(err)
         return data
 
+    @staticmethod
+    def load_json(configfile: str) -> Dict:
+        """
+        Imports a JSON Configuration file
+        :param configfile: Path to the JSON config file.
+        :return: A dictionary containing the configuration data.
+        """
+        with open(configfile, "r") as b:
+            try:
+                data = json.load(b)
+            except Exception as err:
+                print(err)
+        return data
+
     def save_history(self, file_name: str):
         """
         Saves the history dictionary containing all edits to the input text.
