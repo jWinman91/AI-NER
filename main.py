@@ -18,7 +18,7 @@ def main(input_files: List[str], output_dir: str, configfile: str = "config_prom
     subprocess.call(f"mkdir -p {output_dir}", shell=True)
     subprocess.call(f"mkdir -p data/history", shell=True)
     
-    text_editor = Editor(configfile)
+    text_editor = Editor(configfile, config_model_db=None)
     
     for i, input_file in enumerate(input_files):
         input_text = process.read_file(input_file)
