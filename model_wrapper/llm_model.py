@@ -17,7 +17,7 @@ class PromptingModel:
                             n_ctx=params.get("n_ctx", 2048)
                             )
 
-        for param in ["model", "n_threads", "verbose", "n_ctx"]:
+        for param in ["model", "_id", "_rev", "n_threads", "verbose", "n_ctx"]:
             if param in params.keys():
                 del params[param]
 

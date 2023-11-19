@@ -3,17 +3,21 @@ import numpy as np
 import json
 import yaml
 
+from utils.couch_db_handler import CouchDBHandler
 from collections import OrderedDict
-from typing import Dict
+from typing import Dict, Union
 
 
 class Editor:
-    def __init__(self, configfile: str):
+    def __init__(self, config: Union[str, dict], config_model_db: CouchDBHandler):
         """
         Class to edit input text by using a Language Model.
         :param configfile: path to config file that defines location of config files
         """
-        self._prompts = self.load_yml(configfile)
+        if type(config) == str:
+            self._prompts = self.load_yml(config)
+        else:
+            self._prompts = config
 
         self._model_wrappers = dict()
         for prompt_name, prompt_dict in self._prompts.items():
@@ -24,10 +28,8 @@ class Editor:
             
             if param_filename and param_filename.endswith(".yaml"):
                 params = self.load_yml(param_filename)
-            elif param_filename and param_filename.endswith(".json"):
-                params = self.load_json(param_filename) 
             else:
-                params = param_filename if param_filename else {}
+                params = config_model_db.get_config(param_filename) if param_filename else {}
 
             if model_name in self._model_wrappers.keys():
                 continue

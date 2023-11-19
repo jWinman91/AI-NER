@@ -2,9 +2,10 @@ import couchdb
 import os
 import json
 
+from typing import List
 
 class CouchDBHandler:
-    def __init__(self, table_name: str = "config_tasks") -> None:
+    def __init__(self, table_name: str) -> None:
         """
         Builds the CouchDBHandler Object
         :param table_name: Name of the Table
@@ -17,68 +18,71 @@ class CouchDBHandler:
             couch.version()
         except:
             print("Connection error.")
+            couch = None
 
         if table_name in couch:
             self._db_table = couch[table_name]
         else:
             self._db_table = couch.create(table_name)
 
-    def add_task(self, task_dict: dict, task_name: str) -> None:
+    def add_config(self, config_dict: dict, config_name: str) -> None:
         """
-        Add a task to the DB Table
-        :param task_dict: dictionary with the task
-        :param task_name:a name for the task
+        Add a config to the DB Table
+        :param config_dict: dictionary with the config
+        :param config_name:a name for the config
         :return: None
         """
-        taks_name = task_name.lower()
-        task_dict["_id"] = task_name
-        if task_name in self._db_table:
-            raise Exception(f"{task_name} already exists!")
+        config_dict["_id"] = config_name
+        if config_name in self._db_table:
+            raise Exception(f"{config_name} already exists!")
         else:
-            self._db_table.save(task_dict)
+            self._db_table.save(config_dict)
 
-    def update_task(self, task_dict: dict, task_name: str) -> None:
+    def update_config(self, config_dict: dict, config_name: str) -> None:
         """
-        Update a task
-        :param task_dict: a dictionary with the task
-        :param task_name: a task Name
+        Update a config
+        :param config_dict: a dictionary with the config
+        :param config_name: a config Name
         :return: None
         """
-        taks_name = task_name.lower()
-        task_dict["_id"] = task_name
-        if task_name not in self._db_table:
-            raise Exception(f"{task_name} does not exist!")
-        else:
-            self._db_table.save(task_dict)
+        self.delete_config(config_name)
+        config_dict["_id"] = config_name
+        self._db_table.save(config_dict)
 
-    def delete_task(self, task_name) -> None:
+    def delete_config(self, config_name) -> None:
         """
-        Delet a task from the DB
-        :param task_name: a task name
+        Delet a config from the DB
+        :param config_name: a config name
         :return: None
         """
-        taks_name = task_name.lower()
-        if task_name not in self._db_table:
-            raise Exception(f"{task_name} does not exist!")
-        self._db_table.delete(task_name)
+        if config_name not in self._db_table:
+            raise Exception(f"{config_name} does not exist!")
+        config_dict = self.get_config(config_name)
+        self._db_table.delete(config_dict)
 
-    def get_task(self, task_name) -> dict:
+    def get_config(self, config_name) -> dict:
         """
-        Returns a given task
-        :param task_name: a task name
+        Returns a given config
+        :param config_name: a config name
         :return: dictionary
         """
-        taks_name = task_name.lower()
-        if task_name not in self._db_table:
-            raise Exception(f"{task_name} does not exist!")
-        return self._db_table[task_name]
+        if config_name not in self._db_table:
+            raise Exception(f"{config_name} does not exist!")
+        return self._db_table[config_name]
 
-    def backup_tasks(self) -> None:
+    def get_all_config_names(self) -> List[str]:
         """
-        Backups the tasks saved in the DB
+        Returns all names of configs stored in db
+        :return: list of all names
+        """
+        return [id for id in self._db_table]
+
+    def backup_config(self) -> None:
+        """
+        Backups the configs saved in the DB
         :return: None
         """
-        with open("task_backup.txt", "w") as f:
+        with open("config_backup.txt", "w") as f:
             for id in self._db_table:
-                task = self._db_table[id]
-                f.write(json.dumps(task, indent=4))
+                config = self._db_table[id]
+                f.write(json.dumps(config, indent=4))
