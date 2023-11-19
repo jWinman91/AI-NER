@@ -9,10 +9,12 @@ from typing import Dict, Union
 
 
 class Editor:
-    def __init__(self, config: Union[str, dict], config_model_db: CouchDBHandler):
+    def __init__(self, config: Union[str, dict], config_model_db: Union[CouchDBHandler, None]):
         """
         Class to edit input text by using a Language Model.
-        :param configfile: path to config file that defines location of config files
+        :param config: path to config file that defines location of config files
+        :param config_model_db: db table where model configs are stored.
+                                If None, then model_config better be a yaml file.
         """
         if type(config) == str:
             self._prompts = self.load_yml(config)
