@@ -7,7 +7,7 @@ from utils.text_editor import Editor
 from typing import List
 
 
-def main(input_files: List[str], output_dir: str, configfile: str = "config_prompt/anonymize_emails-NER.yaml"):
+def main(input_files: List[str], output_dir: str, configfile: str = "config_task/default_task.yaml"):
     """
     Runs the email editor from the config file.
     :param input_files: List of files of emails
@@ -18,7 +18,7 @@ def main(input_files: List[str], output_dir: str, configfile: str = "config_prom
     subprocess.call(f"mkdir -p {output_dir}", shell=True)
     subprocess.call(f"mkdir -p data/history", shell=True)
     
-    text_editor = Editor(configfile)
+    text_editor = Editor(configfile, config_model_db=None)
     
     for i, input_file in enumerate(input_files):
         input_text = process.read_file(input_file)

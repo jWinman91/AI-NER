@@ -21,7 +21,7 @@ Anonymisierung_PLZ:
 Anonymisierung_PhoneNo:
   model:
     model_wrapper: "llm_model/PromptingModel"
-    model_config: "config_model/german-mistral.yaml"
+    model_config: "config_model/sauerkraut.yaml"
   replace_token: ">PHONE_NO<"
   Context: >
     Extrahiere alle Telefonnummern aus dem folgenden Text und gib die Telefonnummern als Liste [] zurück.
@@ -41,7 +41,7 @@ Anonymisierung_PhoneNo:
 Anonymisierung_KundenNr:
   model:
     model_wrapper: "llm_model/PromptingModel"
-    model_config: "config_model/german-mistral.yaml"
+    model_config: "config_model/sauerkraut.yaml"
   replace_token: ">CUSTOMER_ID<"
   Context: >
     Extrahiere alle Kundennummern aus dem folgenden Text und gib die Kundennummern als Liste [] zurück.
