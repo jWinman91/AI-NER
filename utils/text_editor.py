@@ -106,4 +106,7 @@ class Editor:
 
             self._history_dict[f"{prompt[0]}_output_text"] = output_text
 
-        return list(self._history_dict.values())[-1]
+        output_text = list(self._history_dict.values())[-1]
+        self.save_history("data/history/localhost.json")
+
+        return output_text
