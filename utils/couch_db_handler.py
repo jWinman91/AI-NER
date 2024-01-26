@@ -14,7 +14,7 @@ class CouchDBHandler:
             user = os.getenv("COUCHDB_USER")
             password = os.getenv("COUCHDB_PASSWORD")
             ip = os.getenv("COUCHDB_IP")
-            couch = couchdb.Server(f"http://{user}:{password}@{ip}")
+            couch = couchdb.Server(f"http://{user}:{password}@COUCHDB:5984")
             couch.version()
         except:
             print("Connection error.")
