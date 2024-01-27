@@ -32,6 +32,11 @@ class Config(BaseModel):
 class Text(BaseModel):
     input_text: str
 
+
+class Texts(BaseModel):
+    input_text: List[str]
+
+
 class App:
     def __init__(self, ip: str = "127.0.0.1", port: int = 8000) -> None:
         """
@@ -65,15 +70,29 @@ class App:
         config_dict = {config.config_name: config.config_dict for config in configs}
         all_config_names = model_db.get_all_config_names()
         for key, value in config_dict.items():
-            if "link" in value:
-                if value["link"].endswith(".gguf"):
-                    subprocess.call(f"wget {value['link']} -P models/", shell=True)
-                else:
-                    subprocess.call(f"git clone {value['link']} models/{value['model']}", shell=True)
+            model_dir = "/".join(value["model"].split("/")[:-1])
+            subprocess.call(f"mkdir -p {model_dir}", shell=True)
+            if "link" in value and not os.path.exists(value["model"]):
+                subprocess.call(f"wget {value['link']} -P {model_dir}", shell=True)
                 value.pop("link")
 
             method = "add_config" if key not in all_config_names else "update_config"
             getattr(model_db, method)(value, key)
+
+    def set_tasks(self, configuration: List[str]) -> bool:
+            """
+            Updates the text editor with configured tasks (and models) from the couchdb.
+
+            :param configuration: List of configured tasks to be run by the editor \n
+            :return: True if successfully set all tasks
+            """
+            config_dict = dict()
+            for config in configuration:
+                config_dict[config] = self._task_db.get_config(config)
+
+            self._text_editor = Editor(config_dict, self._model_db)
+
+            return True
 
     def _configure_routes(self) -> None:
         """
@@ -98,8 +117,8 @@ class App:
                 {
                     "config_name": "flair-german",
                     "config_dict": {
-                        "link": "https://huggingface.co/flair/ner-german-large",
-                        "model": "flair/ner-german-large"
+                        "link": "https://huggingface.co/flair/ner-german-large/resolve/main/pytorch_model.bin",
+                        "model": "models/flair/ner-german-large/pytorch_model.bin"
                     }
                 },
             ]]
@@ -219,26 +238,8 @@ class App:
 
             return config
 
-        @self._app.post("/set_tasks")
-        async def set_tasks(configuration: Annotated[List[str], Body(
-            examples=[["email-address", "datum", "persons"]])
-        ]):
-            """
-            Updates the text editor with configured tasks (and models) from the couchdb.
-
-            :param configuration: List of configured tasks to be run by the editor \n
-            :return: True if successfully set all tasks
-            """
-            config_dict = dict()
-            for config in configuration:
-                config_dict[config] = self._task_db.get_config(config)
-
-            self._text_editor = Editor(config_dict, self._model_db)
-
-            return True
-
-        @self._app.post("/anonymize")
-        async def anonymize_text(text: Annotated[Text, Body(
+        @self._app.post("/anonymize_string")
+        async def anonymize_string(text: Annotated[Text, Body(
             examples=[{
                 "input_text": """
                     Sehr geehrte Damen und Herren,
@@ -259,20 +260,66 @@ class App:
                     christian.mayer@gmx.de
             """
             }]
-        )]
+        )],
+                                   configuration: Annotated[List[str], Body(
+                                       examples=[[
+                                           "email-address",
+                                           "datum",
+                                           "persons"
+                                       ]]
+                                   )]
         ) -> str:
             """
             Anonymizes the input text by running the text editor over the configured and set tasks and models.
 
+            :param configuration:
             :param text: Input text to be anonymized \n
             :return: Anonymized text
             """
             input_text = text.input_text
+            tasks_set = self.set_tasks(configuration)
             if input_text is None or len(input_text) == 0:
                 raise HTTPException(status_code=400, detail="no value provided")
-            if self._text_editor is None:
-                raise HTTPException(status_code=400, detail="No task configurations are set yet")
-            return self._text_editor.edit_text(input_text)
+            if not tasks_set:
+                raise HTTPException(status_code=400, detail="Tasks configurations were not set correctly")
+            output_text = self._text_editor.edit_text(input_text)
+            self._text_editor.save_history("data/history/last_anonymize_str.json")
+            return output_text
+
+        @self._app.post("/anonymize_bulk")
+        async def anonymize_bulk(texts: Annotated[Texts, Body(
+            examples=[{
+                "input_text": ["""Paul Dirac/Sykes Herne/Team Blue
+                                  Kontakt: Kundin 
+                                  Kundin meldet dass der Techniker informiert ist""",
+                               """-Pierre Alphonso Laurent/CNX Bochum/Sales ID: 11211  Kontakt: Kundin
+                                  Anliegen: Kundin ist umgezogen""",
+                               """Arwah Abadhi/Sykes Bochum/Team Lila
+                                  Kontakt: Kundin
+                                  Kundin meldet dass der Techniker informiert ist"""]
+            }]
+        )],
+                                 configuration: Annotated[List[str], Body(
+                                     examples=[[
+                                         "email-address",
+                                         "datum",
+                                         "persons"
+                                     ]]
+                                 )]
+        ) -> List[str]:
+            input_texts = texts.input_text
+            tasks_set = self.set_tasks(configuration)
+            if input_texts is None or len(input_texts) == 0:
+                raise HTTPException(status_code=400, detail="no value provided")
+            if not tasks_set:
+                raise HTTPException(status_code=400, detail="Tasks configurations were not set correctly")
+
+            output_texts = []
+            for i, input_text in enumerate(input_texts):
+                output_texts.append(self._text_editor.edit_text(input_text))
+                self._text_editor.save_history(f"data/history/anonymize_bulk_{i}.json")
+
+            return output_texts
 
     def run(self) -> None:
         """
@@ -285,7 +332,7 @@ class App:
 if __name__ == '__main__':
     os.environ["COUCHDB_USER"] = "admin"
     os.environ["COUCHDB_PASSWORD"] = "JensIsCool"
-    os.environ["COUCHDB_IP"] = "127.0.0.1:5894"
+    os.environ["COUCHDB_IP"] = "127.0.0.1:5984"
 
-    api = App(ip="127.0.0.1", port=8000)
+    api = App(ip="0.0.0.0", port=8000)
     api.run()
