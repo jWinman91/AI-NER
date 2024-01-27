@@ -70,9 +70,9 @@ class App:
         config_dict = {config.config_name: config.config_dict for config in configs}
         all_config_names = model_db.get_all_config_names()
         for key, value in config_dict.items():
-            model_dir = "/".join(value["model"].split("/")[:-1])
-            subprocess.call(f"mkdir -p {model_dir}", shell=True)
             if "link" in value and not os.path.exists(value["model"]):
+                model_dir = "/".join(value["model"].split("/")[:-1])
+                subprocess.call(f"mkdir -p {model_dir}", shell=True)
                 subprocess.call(f"wget {value['link']} -P {model_dir}", shell=True)
                 value.pop("link")
 
