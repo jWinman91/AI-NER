@@ -291,21 +291,18 @@ class App:
         @self._app.post("/anonymize_bulk")
         async def anonymize_bulk(texts: Annotated[Texts, Body(
             examples=[{
-                "input_text": ["""Paul Dirac/Sykes Herne/Team Blue
-                                  Kontakt: Kundin 
-                                  Kundin meldet dass der Techniker informiert ist""",
-                               """-Pierre Alphonso Laurent/CNX Bochum/Sales ID: 11211  Kontakt: Kundin
-                                  Anliegen: Kundin ist umgezogen""",
-                               """Arwah Abadhi/Sykes Bochum/Team Lila
-                                  Kontakt: Kundin
-                                  Kundin meldet dass der Techniker informiert ist"""]
+                "input_text": ["""Paul Dirac/Sykes Herne/Team Blue % Kontakt: Kundin % Kundin meldet dass der Techniker informiert ist""",
+                               """-Pierre Alphonso Laurent/CNX Bochum/Sales ID: 11211  Kontakt: Kundin % Anliegen: Kundin ist umgezogen""",
+                               """Arwah Abadhi/Sykes Bochum/Team Lila % Kontakt: Kundin % Kundin meldet dass der Techniker informiert ist"""]
             }]
         )],
                                  configuration: Annotated[List[str], Body(
                                      examples=[[
                                          "email-address",
                                          "datum",
-                                         "persons"
+                                         "persons",
+                                         "locations",
+                                         "organisations"
                                      ]]
                                  )]
         ) -> List[str]:
