@@ -332,6 +332,8 @@ if __name__ == '__main__':
     os.environ["COUCHDB_USER"] = "admin"
     os.environ["COUCHDB_PASSWORD"] = "JensIsCool"
     os.environ["COUCHDB_IP"] = "127.0.0.1:5984"
+    
+    subprocess.call("mkdir -p data/history", shell=True)
 
     api = App(ip="0.0.0.0", port=8000)
     api.run()
