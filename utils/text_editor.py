@@ -101,12 +101,10 @@ class Editor:
             self._history_dict[f"{prompt[0]}_patterns"] = list(unique_patterns)
 
             unique_patterns.discard("FAILED")
+            unique_patterns.discard("")
             for pattern in unique_patterns:
                 output_text = output_text.replace(pattern, prompt[1]["replace_token"])
 
             self._history_dict[f"{prompt[0]}_output_text"] = output_text
 
-        output_text = list(self._history_dict.values())[-1]
-        self.save_history("data/history/localhost.json")
-
-        return output_text
+        return list(self._history_dict.values())[-1]

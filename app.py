@@ -75,6 +75,8 @@ class App:
                 subprocess.call(f"mkdir -p {model_dir}", shell=True)
                 subprocess.call(f"wget {value['link']} -P {model_dir}", shell=True)
                 value.pop("link")
+            elif "link" in value:
+                value.pop("link")
 
             method = "add_config" if key not in all_config_names else "update_config"
             getattr(model_db, method)(value, key)
