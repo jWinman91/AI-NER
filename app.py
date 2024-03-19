@@ -1,6 +1,7 @@
 import os
 import uvicorn
 import subprocess
+import nltk
 
 from utils.couch_db_handler import CouchDBHandler
 from utils.text_editor import Editor
@@ -56,6 +57,7 @@ class App:
         self._text_editor = None #Editor("config_task/default_task.yaml", self._model_db)
         
         self._configure_routes()
+        nltk.download('punkt')
 
     @staticmethod
     def modify_config(configs: List[Config], model_db: CouchDBHandler):
@@ -329,9 +331,6 @@ class App:
 
 
 if __name__ == '__main__':
-    os.environ["COUCHDB_USER"] = "admin"
-    os.environ["COUCHDB_PASSWORD"] = "JensIsCool"
-    os.environ["COUCHDB_IP"] = "127.0.0.1:5984"
     
     subprocess.call("mkdir -p data/history", shell=True)
 
