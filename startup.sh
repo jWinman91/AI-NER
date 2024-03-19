@@ -15,7 +15,7 @@ fi
 #docker build --tag ai_ner .
 #docker run --network=JensNetwork -p 8000:8000 --name AINER ai_ner
 
-if ps -a | grep -v grep | grep "$app.py" > /dev/null; then
+if ps aux | grep -v grep | grep "python app.py" > /dev/null; then
   echo "app.py is already running!"
 else
   echo "Starting app.py ..."
