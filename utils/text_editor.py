@@ -84,13 +84,30 @@ class Editor:
         
         self._history_dict = OrderedDict()
 
+    @staticmethod
+    def replace_patterns(unique_patterns: Set[str], text: str, replace_token: str) -> str:
+        """
+        Replaces all patterns with given replace token.
+        :param unique_patterns: patterns to be replaced.
+        :param text: text string in which to replace the pattern
+        :param replace_token: token which replaces the pattern
+        :return: edited text
+        """
+        unique_patterns.discard("FAILED")
+        unique_patterns.discard("")
+        output_text = text
+        for pattern in unique_patterns:
+            output_text = output_text.replace(pattern, replace_token)
+        return output_text
+
     def edit_text(self, input_text: str) -> str:
         """
         Edits the input text based on instructions provided in the configuration file.
         :param input_text: Input text to be edited
         :return: Edited input text
         """
-        self._history_dict[f"input_text"] = input_text
+        self._history_dict = OrderedDict()
+        self._history_dict["input_text"] = input_text
         for prompt in self._prompts.items():
             output_text = list(self._history_dict.values())[-1]
             model_name = prompt[1]["model"]["model_wrapper"].split("/")[-1]
@@ -98,13 +115,14 @@ class Editor:
             run_model_wrapper = getattr(self._model_wrappers[model_name], "run")
             unique_patterns = run_model_wrapper(output_text, prompt, self._history_dict)
 
-            self._history_dict[f"{prompt[0]}_patterns"] = list(unique_patterns)
-
-            unique_patterns.discard("FAILED")
-            unique_patterns.discard("")
-            for pattern in unique_patterns:
-                output_text = output_text.replace(pattern, prompt[1]["replace_token"])
-
+            if type(unique_patterns) is dict:
+                self._history_dict[f"{prompt[0]}_patterns"] = list(set.union(*list(unique_patterns.values())))
+                for entity_type, entities in unique_patterns.items():
+                    output_text = self.replace_patterns(entities, output_text, prompt[1]["replace_token"][entity_type])
+            else:
+                self._history_dict[f"{prompt[0]}_patterns"] = list(unique_patterns)
+                output_text = self.replace_patterns(unique_patterns, output_text, prompt[1]["replace_token"])
+    
             self._history_dict[f"{prompt[0]}_output_text"] = output_text
 
         return list(self._history_dict.values())[-1]
