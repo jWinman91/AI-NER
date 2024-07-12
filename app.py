@@ -1,7 +1,7 @@
 import os
 import uvicorn
 import subprocess
-import nltk
+import argparse
 
 from utils.couch_db_handler import CouchDBHandler
 from utils.text_editor import Editor
@@ -39,7 +39,7 @@ class Texts(BaseModel):
 
 
 class App:
-    def __init__(self, ip: str = "127.0.0.1", port: int = 8000) -> None:
+    def __init__(self, ip: str = "127.0.0.1", port: int = 8000, debug: bool = False) -> None:
         """
         Builds the App Object for the Server Backend
 
@@ -48,6 +48,7 @@ class App:
         """
         self._ip = ip
         self._port = port
+        self._debug = debug
         self._app = FastAPI(
             title="AI-NER: Text editing with Language Models from Huggingface 🤗",
             description=DESCRIPTION
@@ -57,7 +58,6 @@ class App:
         self._text_editor = None #Editor("config_task/default_task.yaml", self._model_db)
         
         self._configure_routes()
-        nltk.download('punkt')
 
     @staticmethod
     def modify_config(configs: List[Config], model_db: CouchDBHandler):
@@ -283,15 +283,16 @@ class App:
             input_text = text.input_text
             tasks_set = self.set_tasks(configuration)
             if input_text is None or len(input_text) == 0:
-                raise HTTPException(status_code=400, detail="no value provided")
+                raise HTTPException(status_code=400, detail="No value provided")
             if not tasks_set:
                 raise HTTPException(status_code=400, detail="Tasks configurations were not set correctly")
             output_text = self._text_editor.edit_text(input_text)
-            self._text_editor.save_history("data/history/last_anonymize_str.json")
+            if self._debug:
+                self._text_editor.save_history("data/history/last_anonymize_str.json")
             return output_text
 
-        @self._app.post("/anonymize_bulk")
-        async def anonymize_bulk(texts: Annotated[Texts, Body(
+        @self._app.post("/anonymize_batch")
+        async def anonymize_batch(texts: Annotated[Texts, Body(
             examples=[{
                 "input_text": ["""Paul Dirac/Sykes Herne/Team Blue % Kontakt: Kundin % Kundin meldet dass der Techniker informiert ist""",
                                """-Pierre Alphonso Laurent/CNX Bochum/Sales ID: 11211  Kontakt: Kundin % Anliegen: Kundin ist umgezogen""",
@@ -310,6 +311,7 @@ class App:
         ) -> List[str]:
             input_texts = texts.input_text
             tasks_set = self.set_tasks(configuration)
+            
             if input_texts is None or len(input_texts) == 0:
                 raise HTTPException(status_code=400, detail="no value provided")
             if not tasks_set:
@@ -318,7 +320,8 @@ class App:
             output_texts = []
             for i, input_text in enumerate(input_texts):
                 output_texts.append(self._text_editor.edit_text(input_text))
-                self._text_editor.save_history(f"data/history/anonymize_bulk_{i}.json")
+                if self._debug:
+                    self._text_editor.save_history(f"data/history/anonymize_bulk_{i}.json")
 
             return output_texts
 
@@ -331,10 +334,17 @@ class App:
 
 
 if __name__ == '__main__':
-    subprocess.call("mkdir -p data/history", shell=True)
+    if not os.path.exists("data/history"):
+        os.mkdir("data/history")
+    
+    parser = argparse.ArgumentParser(description='Host AI-NER.')
+    parser.add_argument('-p', '--port', type=int, default=5000, help='the TCP/Port value')    
+    parser.add_argument('--debug', action='store_true')
+    parser.add_argument('localaddress', nargs='*', help='the local Address where the server will listen')
+    
     os.environ["COUCHDB_USER"] = "admin"
     os.environ["COUCHDB_PASSWORD"] = "JensIsCool"
     os.environ["COUCHDB_IP"] = "127.0.0.1:5984"
     
-    api = App(ip="0.0.0.0", port=8000)
+    api = App(ip=args.localaddress, port=args.port, debug=args.debug)
     api.run()
